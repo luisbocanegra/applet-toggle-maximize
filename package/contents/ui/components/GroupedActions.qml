@@ -64,7 +64,7 @@ ColumnLayout {
 
             // cursor position
             property int cursorLine: 1 + text.substring(0, cursorPosition).split("\n").length - 1
-            property int cursorColumn: cursorPosition - text.lastIndexOf("\n", cursorPosition - 1)
+            property int cursorColumn: cursorPosition - text.lastIndexOf("\n", cursorPosition - 1) - 1
 
             Text {
                 anchors.bottom: parent.bottom

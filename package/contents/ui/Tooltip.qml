@@ -25,23 +25,25 @@ Item {
         var configValue = plasmoid.configuration[configKey+"Action"]
         if (configValue != "") {
             var parts = configValue.toString().split(",")
-            if (parts[0] == "custom_command") {
+            if (parts[1] == "custom_command") {
                 var command = plasmoid.configuration[configKey+"Command"]
                 var commandShort = "Nothing is set"
                 if (command!==undefined && command!==""){
                     var command = truncateString(command,20)
                     commandShort = command
                 }
-                return parts[1]+" - "+commandShort
+                return parts[0]+" - "+commandShort
             }
-            if (parts[0] == "launch_application"){
+            if (parts[1] == "launch_application"){
                 var appName = logic.launcherData(plasmoid.configuration[configKey+"AppUrl"]).applicationName
-                return parts[1]+" - "+ (appName.length>0?appName:"Nothing is set")
+                return parts[0]+" - "+ (appName.length>0?appName:"Nothing is set")
             }
-            if (parts[0] == "Disabled") {
+            if (parts[1] == "Disabled") {
                 return parts[0]
             }
-            return parts[0]+" - "+parts[1]
+            return parts[0]+" - "+parts[2].replace(
+                /[-_]/g, " "
+                ).replace(/\b\w/g, function(l){ return l.toUpperCase() })
         }
         return "unknown"
     }
@@ -85,17 +87,14 @@ Item {
                     Layout.minimumWidth: Math.min(implicitWidth, preferredTextWidth)
                     Layout.maximumWidth: preferredTextWidth
                     elide: Text.ElideRight
+                    font.weight: Font.DemiBold
                 }
-
-                RowLayout {
-                    Item { implicitWidth: Kirigami.Units.smallSpacing }
-                    PlasmaComponents.Label {
-                        text: getShownAction(modelData[1])
-                        opacity: .7
-                        Layout.minimumWidth: Math.min(implicitWidth, preferredTextWidth)
-                        Layout.maximumWidth: preferredTextWidth
-                        elide: Text.ElideRight
-                    }
+                PlasmaComponents.Label {
+                    text: getShownAction(modelData[1])
+                    opacity: 0.65
+                    Layout.minimumWidth: Math.min(implicitWidth, preferredTextWidth)
+                    Layout.maximumWidth: preferredTextWidth
+                    elide: Text.ElideRight
                 }
             }
         }

@@ -55,7 +55,8 @@ KCM.SimpleKCM {
 
     property bool isLoading: true
 
-    property string getShortcutsCommand: "for comp in $("+qdbusCommand.text+" org.kde.kglobalaccel | grep '/component/'); do IFS=$'\\n';for shortcut in $("+qdbusCommand.text+" org.kde.kglobalaccel $comp org.kde.kglobalaccel.Component.shortcutNames); do echo $comp,$shortcut;done; done | sort"
+    // for comp in $(qdbus org.kde.kglobalaccel | grep '/component/'); do friendly_name=$(qdbus org.kde.kglobalaccel $comp org.kde.kglobalaccel.Component.friendlyName) IFS=$'\n';for shortcut in $(qdbus org.kde.kglobalaccel $comp org.kde.kglobalaccel.Component.shortcutNames); do echo $friendly_name,$comp,$shortcut;done; done | sort
+    property string getShortcutsCommand: "for comp in $("+qdbusCommand.text+" org.kde.kglobalaccel | grep '/component/'); do name=$(echo $comp | sed 's|\\/component\\/||g') friendly_name=$("+qdbusCommand.text+" org.kde.kglobalaccel $comp org.kde.kglobalaccel.Component.friendlyName) IFS=$'\\n';for shortcut in $("+qdbusCommand.text+" org.kde.kglobalaccel $comp org.kde.kglobalaccel.Component.shortcutNames); do echo $friendly_name,$name,$shortcut;done; done | sort"
 
     ListModel {
         id: shortcutsList
@@ -63,16 +64,19 @@ KCM.SimpleKCM {
             label: qsTr("Disabled")
             shortcutName: "Disabled"
             component: "Disabled"
+            componentFriendlyName: "Disabled"
         }
         ListElement {
             label: qsTr("Custom Command")
             shortcutName: "Custom Command"
             component: "custom_command"
+            componentFriendlyName: "Custom Command"
         }
         ListElement {
             label: qsTr("Launch Application/URL")
             shortcutName: "Launch Application/URL"
             component: "launch_application"
+            componentFriendlyName: "Launch Application/URL"
         }
     }
 
@@ -82,22 +86,19 @@ KCM.SimpleKCM {
             label: qsTr("Disabled")
             shortcutName: "Disabled"
             component: "Disabled"
+            componentFriendlyName: "Disabled"
         }
         ListElement {
             label: qsTr("Custom Command")
             shortcutName: "Custom Command"
             component: "custom_command"
+            componentFriendlyName: "Custom Command"
         }
         ListElement {
             label: qsTr("Launch Application/URL")
             shortcutName: "Launch Application/URL"
             component: "launch_application"
-        }
-
-        ListElement {
-            label: qsTr("Launch Application/URL")
-            shortcutName: "Launch Application/URL"
-            component: "launch_application"
+            componentFriendlyName: "Launch Application/URL"
         }
     }
 
@@ -127,6 +128,7 @@ KCM.SimpleKCM {
         getShortcuts.exec()
 
         exited.connect(function (cmd, exitCode, exitStatus, stdout, stderr) {
+            console.log(cmd);
             var lines = stdout.trim().split("\n")
             const blackList = [
                 "activate widget",
@@ -156,11 +158,18 @@ KCM.SimpleKCM {
                     continue
                 }
                 const line = lines[i].toString().split(",")
-                var component = line[0].split("/")
-                component = component[component.length - 1]
-                const shortcutName = line[1]
+                let componentFriendlyName = line[0]
+                componentFriendlyName = componentFriendlyName[0].toUpperCase()
+                    + componentFriendlyName.substring(1)
+                const component = line[1]
+                const shortcutName = line[2]
                 shortcutsList.append({
-                    "label": component + " - " + shortcutName,
+                    "label": componentFriendlyName
+                        + " - "
+                        + shortcutName.replace(
+                            /[-_]/g, " "
+                        ).replace(/\b\w/g, function(l){ return l.toUpperCase() }),
+                    "componentFriendlyName": componentFriendlyName,
                     "component": component,
                     "shortcutName": shortcutName
                     })

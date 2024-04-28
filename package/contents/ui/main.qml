@@ -250,8 +250,9 @@ PlasmoidItem {
 
     function runAction(action,command,application) {
         printLog `RUNNING_ACTION: ${action}`
-        var component = action[0]
-        var actionNme = action[1]
+        var componentFriendlyName = action[0]
+        var component = action[1]
+        var actionNme = action[2]
         if (actionNme != "Disabled") {
             // custom command
             if (component == "custom_command") {

@@ -10,15 +10,19 @@ ComboBox {
     property bool isLoading: true
 
     onCurrentIndexChanged: {
-        configValue = model.get(currentIndex)["component"] + "," + model.get(currentIndex)["shortcutName"];
+        configValue = model.get(currentIndex)["componentFriendlyName"]
+            + "," + model.get(currentIndex)["component"]
+            + "," + model.get(currentIndex)["shortcutName"];
     }
 
     function updateCombo()
     {
         var index = 0
         for (var i= 0; i < model.count; i++) {
-            const shortcut = model.get(i)["component"] + "," + model.get(i)["shortcutName"]
-            if (shortcut === plasmoid.configuration[configName]){
+            const shortcut = model.get(i)["componentFriendlyName"]
+            + "," + model.get(i)["component"]
+            + "," + model.get(i)["shortcutName"]
+            if (shortcut.includes(plasmoid.configuration[configName])){
                 index = i;
                 break;
             }
